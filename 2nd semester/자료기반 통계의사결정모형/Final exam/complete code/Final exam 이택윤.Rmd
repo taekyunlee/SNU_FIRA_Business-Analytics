@@ -1,0 +1,443 @@
+---
+title: "take home exam"
+author: "TAEK YUN LEE"
+date: "2018/9/09"
+output: html_document
+---
+
+
+
+
+```{r}
+if(!require(ggplot2)){install.packages("ggplot2"); library(ggplot2)}
+dat<- read.csv('C:/Users/renz/Desktop/Final/mobility.csv')
+```
+
+#1-a
+```{r}
+ggplot(data = dat, aes(x = Longitude, y = Latitude , col = Mobility)) + geom_point()
+```
+
+지리적으로 경제적 이동성을 봤을때 미국 동부나 서부보다는 중부에서 상대적으로 경제적 이동성이높은것으로 보인다.
+
+
+#1-b 
+```{r}
+newdat = dat[(dat$State != 'AK') & (dat$State != 'HI'), ]
+newdat$MobilityCat <- 'NA'
+newdat$MobilityCat <- ifelse(newdat$Mobility>0.1, 'high', 'low')
+ggplot(data = newdat, aes(x = Longitude, y = Latitude , col = MobilityCat)) + geom_point()
+```
+
+MobilityCat 이라는 새로운 변수를 만들고 그것을 기준으로 plotting을 한 결과 바로위의 그래프보다 
+경제적이동성이 동부나 서부보다 중부근처에서 높은것이 뚜렷히 보인다.
+
+#2
+```{r, message= FALSE, warning= FALSE}
+attach(dat)
+fit1 <- lm( Mobility ~ Population , data = dat )
+plot(Population, Mobility )
+abline(fit1 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+#install.packages('knitr')
+#install.packages('kableExtra')
+library(knitr)
+library(kableExtra)
+kable(as.data.frame(summary(fit1)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+population에 대한 계수는 -6.732228e-09과 같이 나왔고 인구가 많아 질수록 경제적이동성이 낮아지는 성향이 있으나 이 모델에 대한 설명력은 0.01818정도로 굉장히 낮다.
+
+
+```{r, message= FALSE, warning= FALSE}
+fit2 <- lm( Mobility ~ Income , data = dat )
+plot(Income, Mobility )
+abline(fit2 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit2)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+income에대한 계수는 3.094097e-07이고 소득이 많을수록 경제적이동성이 
+미약하게 증가하는 경향을 보이지만 역시 설명력은 낮은 편이다.
+
+
+```{r, message= FALSE, warning= FALSE}
+fit3 <- lm( Mobility ~ Seg_racial , data = dat )
+plot(Seg_racial, Mobility )
+abline(fit3 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit3)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+Seg_racial에 대한 회귀계수는 -0.1835019이며 Seg_racial이 증가할수록 
+경제적 이동성이 낮아지는 경향이 있다.
+
+```{r, message= FALSE, warning= FALSE}
+fit4 <- lm( Mobility ~ Share01 , data = dat )
+plot(Share01, Mobility )
+abline(fit4 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit4)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+Share01에 대한 회귀계수는 -0.001718199이며 share01이 미약하게 낮아지는 경향이 있다. 설명력은 낮다.
+
+```{r, message= FALSE, warning= FALSE}
+fit5 <- lm( Mobility ~ School_spending , data = dat )
+plot(School_spending, Mobility )
+abline(fit5 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit5)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+School_spending에 대한 회귀계수는 0.01146429정도이며 전체적으로 School_spending이 늘어날수록 경제적이동성도 증가하는 편이다. 
+
+
+```{r, message= FALSE, warning= FALSE}
+fit6 <- lm( Mobility ~ Violent_crime , data = dat )
+plot(Violent_crime, Mobility )
+abline(fit6 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit6)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+Violent_crime에 대한 회귀계수는 -10.0505704 정도 되며 Violent_crime이 높아질수록 경제적이동성이 낮아지는 경향이 있다. 설명력은 낮다.
+
+
+```{r, message= FALSE, warning= FALSE}
+fit7 <- lm( Mobility ~ Commute , data = dat )
+plot(Commute, Mobility )
+abline(fit7 , col ='red')
+```
+```{r, message= FALSE, warning= FALSE}
+kable(as.data.frame(summary(fit7)[4]), digits=30) %>% kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+Commute에대한 회귀계수는 0.2218695292이며 Commute이 증가할수록 경제적 이동성이 높아지는 경향이 있다.  
+
+
+#3-a
+```{r, message= FALSE, warning= FALSE}
+linear.fit <- lm( Mobility ~., data = dat[,-c(1,2,20,21)] ) 
+summary(linear.fit)
+```
+
+#3-b 
+ID라는 변수를 가지고 회귀분석을 시행하였을 때 유의확률이 클뿐만 아니라 
+ID는 경제적이동성과 상관관계가 없다고 판단되기때문에 ID라는 변수는 제외합니다.
+
+#3-c
+설명 변수 중에서 'ID','Name','progressivity', 'EITC' 를 우선적으로 제거 하였는데
+우선 'ID'와'Name'는 유의하지 않은 변수들이었으며 'progressivity'와 'EITC'는 
+회귀분석 결과에 NA값을 유발하므로 제외하였습니다.
+뒤에 3-e번 문제 부터는 전체 변수를 가지고 회귀적합 결과 유의확률이 0.05 이하인
+변수들만 가지고 시행하였습니다.
+
+#3-d
+population에대한 회귀계수는 -6.732228e-09에서 1.147e-09으로 바뀌었다.
+
+Income에대한 회귀계수는 3.094097e-07에서 1.081e-06으로 바뀌었다.
+
+Seg_racial에대한 회귀계수는 -0.1835019에서 -6.356e-02으로 바뀌었다. 
+
+share01에대한 회귀계수는 -0.001718199에서  -2.217e-02으오 바뀌었다.
+
+School_spending에대한 회귀계수는 0.01146429에서 -6.120e-04으로 바뀌었다.
+
+Violent_crime에 대한 회귀계수는 -10.0505704에서  -2.788e-01으로 바뀌었다.
+
+Commute에대한 회귀계수는 0.2218695292에서 5.913e-02으로 바뀌었다.
+
+population, School_spending에 대한 계수의 부호가 바뀌었습니다. 
+
+#3-e
+```{r, message= FALSE, warning= FALSE}
+#coeffs[coeffs[,4] < 0.05,]
+#install.packages('car')
+#vif(linear.fit) 
+#linear.fit
+library(car)
+linear.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing + Migration_out + Foreign_born + Social_capital+ Single_mothers)
+vif(linear.fit)
+```
+위의 변수들을 가지고서 다중회귀분석을 시행하고 vif값을 살펴본결과 10을 넘는 
+vif값은 없으므로 다중공선성은 의심되지 않지만 
+다중 공선성을 피하기 위해서는 각 변수들간의 상관계수행렬을 만들어 살펴보거나
+vif값이 10이 넘는 것들을 제거하면된다. 
+또한 비슷한 성질을 지닌 변수들을 넣지 않는 방법도 있다.
+
+
+#4-a 
+```{r, message= FALSE, warning= FALSE}
+sum(is.na(dat$Tuition))
+sum(is.na(dat$Colleges))
+sum(is.na(dat$Graduation))
+```
+Tuition은 NA값이 161개 
+Colleges는 NA값이 157개
+Graduation은 NA값이 160개이다.
+
+
+
+#4-b  
+```{r, message= FALSE, warning= FALSE} 
+plot(log(dat$Population), dat$Mobility ,
+     col= ifelse( is.na(dat$Colleges)  , 'red'  , 'black' ))   
+
+plot(log(dat$Population), dat$Mobility ,
+     col= ifelse( is.na(dat$Tuition)  , 'blue'  , 'black' )) 
+
+plot(log(dat$Population), dat$Mobility ,
+     col= ifelse( is.na(dat$Graduation)  , 'green'  , 'black' ))   
+```
+
+log(dat$Population) 값이 11이하인 점들에 한해서 NA값을 가지는 경향이 보인다.
+
+#4-c 
+```{r, message= FALSE, warning= FALSE}
+newdat2 <- dat
+newdat2$HE <-'NA'
+newdat2$Colleges[is.na(newdat2$Colleges)] <-0
+newdat2$Tuition[is.na(newdat2$Tuition)] <-0
+newdat2$Graduation[is.na(newdat2$Graduation)] <-0
+
+newdat2$HE <- ifelse(newdat2$Colleges >0 | newdat2$Tuition >0 | newdat2$Graduation>0,'TRUE','FALSE')
+```
+#5
+```{r, message= FALSE, warning= FALSE}
+linear.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing +  Foreign_born + Social_capital+ Single_mothers +Violent_crime  , data = newdat2)
+summary(linear.fit)
+```
+4번에서 도출된 HE라는 변수를 이용해봤으나 설명력에 차이가 없어서 제외하였고 
+위에 보이는 변수들만을 이용하여 회귀분석을 수행하였다. 또한 Migration_out도 마찬가지 이유로 
+제외하였다.
+
+
+ 
+#6 
+```{r, message= FALSE, warning= FALSE}
+newdat2$Middle_class[is.na(newdat2$Middle_class)] <-0
+newdat2$Social_capital[is.na(newdat2$Social_capital)] <-0
+
+newdat2$pred_Mobility <-'NA'
+newdat2$pred_Mobility <- predict(linear.fit , newdata =newdat2)
+
+library(gridExtra)
+par(mfrow =c(1,2))
+ggplot(data = dat, aes(x = Longitude, y = Latitude , col = Mobility)) + geom_point()
+
+ggplot(data = newdat2, aes(x = Longitude, y = Latitude , col = pred_Mobility)) + geom_point()
+
+#grid.arrange(p1,p2,ncol = 2, nrow =1, widths=c(10,10) )
+```
+
+실제 그래프와 예측된 그래프를 비교해보면 예측된 그래프의 예측 수치들이 실제그래프의 경제적이동성 
+수치를 완벽하게 가까이 예측하지는 못한다. 하지만 비슷한 추세를 보인다.
+
+
+#7-a
+```{r, message= FALSE, warning= FALSE}
+paste0('실제값   ', newdat2[newdat2$Name == 'Pittsburgh'  , ]$Mobility)
+paste0('예측값   ', newdat2[newdat2$Name == 'Pittsburgh'  , ]$pred_Mobility)
+```
+
+#7-b
+```{r, message= FALSE, warning= FALSE}
+
+newdat2$double_crime <-'NA'
+newdat2$double_crime <- newdat2$Violent_crime*2
+
+newdat2$half_crime <-'NA'
+newdat2$half_crime <- newdat2$Violent_crime*0.5
+
+double.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing +  Foreign_born + Social_capital+ Single_mothers + double_crime , data = newdat2)
+
+half.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing +  Foreign_born + Social_capital+ Single_mothers + half_crime , data = newdat2)
+
+
+newdat2$pred_double_crime <-'NA'
+newdat2$pred_double_crime <- predict(double.fit , newdata = newdat2)
+
+newdat2$pred_half_crime <-'NA'
+newdat2$pred_half_crime <- predict(half.fit , newdata = newdat2)
+
+newdat2[newdat2$Name == 'Pittsburgh'  , ]
+
+newdat2[newdat2$Name == 'Pittsburgh'  , ]$pred_double_crime
+newdat2[newdat2$Name == 'Pittsburgh'  , ]$pred_half_crime
+```
+ violent crime rate값을 두배를 한경우나 1/2한 경우나 예측된값에 있어서 차이가 없다.
+
+
+#7-c,d 
+```{r, message= FALSE, warning= FALSE}
+linear.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing +  Foreign_born + Social_capital+ Single_mothers +Violent_crime , data = newdat2)
+
+predict(linear.fit, newdata=data.frame(Black=0.075 ,Seg_racial=0.323 ,Seg_poverty=0.069 ,Commute=0.287  ,Middle_class=0.533, Manufacturing= 0.124 ,  Foreign_born=0.025 , Social_capital=0.604, Single_mothers=0.209 ,Violent_crime= 0.002), interval="confidence")
+
+predict(linear.fit, newdata=data.frame(Black=0.075 ,Seg_racial=0.323 ,Seg_poverty=0.069 ,Commute=0.287  ,Middle_class=0.533, Manufacturing= 0.124 ,  Foreign_born=0.025 , Social_capital=0.604, Single_mothers=0.209 ,Violent_crime= 0.002), interval="prediction")
+```
+confidence interval 과 prediction interval을 비교해 보면 prediction interval의 범위가
+confidence interval에 비해 넓은 범위를 보인다.
+
+
+#8-a 
+```{r, message= FALSE, warning= FALSE}
+linear.fit <- lm(Mobility ~ Black +  Seg_racial +Seg_poverty +Commute  +Middle_class+ Manufacturing +  Foreign_born + Social_capital+ Single_mothers +Violent_crime , data = newdat2)
+summary(linear.fit)
+
+plot(predict(linear.fit), residuals(linear.fit))
+```
+
+#8-b 
+```{r, message= FALSE, warning= FALSE}
+sort(as.vector(unclass(residuals(linear.fit))))[1:5]
+sort(as.vector(unclass(residuals(linear.fit))),decreasing=T)[1:5]
+match(sort(as.vector(unclass(residuals(linear.fit))))[1:5],as.vector(unclass(residuals(linear.fit))))
+match(sort(as.vector(unclass(residuals(linear.fit))),decreasing=T)[1:5],as.vector(unclass(residuals(linear.fit))))
+
+plot(predict(linear.fit),residuals(linear.fit), col =ifelse(newdat2$Name %in% newdat2[c(266,587,592,581,447,355,363,361,349,356),]$Name ,'red','black'))
+```
+
+잔차가 양과음으로 가장큰 도시들의 이름
+New York, Wichita Falls, Stephenville , Big Spring, Columbus,  Centralia    
+Duluth ,Jonesboro, Heber Springs ,Carbondale 
+빨간색 점으로 표시가 가능하다.
+
+#9-a 
+```{r, message= FALSE, warning= FALSE}
+plot(newdat2$Mobility , newdat2$pred_Mobility)
+```
+
+실제mobility의값과예측된mobility의값을이용하여scatterplot을그린 결과
+선형보다는 비선형에 비슷한 추세를 보이며 서로 어느정도의 관련성을 보여줍니다.
+하지만 완전한 선형에 가까운 추세를 보이지는 않기 때문에 예측력이 높다고는 말할수 없습니다. 선형에 가까울수록 예측력이 높다고 할 수 있습니다.
+
+#9-b 
+```{r, message= FALSE, warning= FALSE}
+plot(predict(linear.fit), residuals(linear.fit))
+```
+
+모형의 잔차와 예측된 mobility의 값을 이용하여 scatter plot을 그린결과
+잔차 0을 기준으로 점들이 모여있으나 대략 예측값 0.125를 기준 오른쪽부터 
+잔차들이 퍼지는 경향을 보이는데 잔차의 등분산성 가정을 어느정도 위배하는
+패턴을 보입니다. 선형추세는 보이지 않으며 0.0을기준으로 변동성이 적도록 모여있는것이 가장 이상적이라고 할 수 있습니다.
+
+#10-a
+```{r, message= FALSE, warning= FALSE}
+fit.frac = lm(Mobility ~ Middle_class , data = dat)
+confidence_interval = predict(fit.frac, newdata = dat , interval = 'confidence'  ,level = 0.95)
+prediction_interval = predict(fit.frac, newdata = dat , interval = 'prediction',level = 0.95)
+
+plot(Mobility ~ Middle_class, data = dat, pch = 16, cex = 0.5)
+abline(fit.frac , col = 'red')
+lines(dat$Middle_class , confidence_interval[,2],col='blue')
+lines(dat$Middle_class , confidence_interval[,3],col='blue')
+lines(dat$Middle_class , prediction_interval[,2],col='green')
+lines(dat$Middle_class , prediction_interval[,3],col='green')
+plot( predict(fit.frac)  , residuals(fit.frac)) 
+```
+
+잔차의 정규성과 등분산성을 만족하는지 알아보기 위해서 잔차도를 그려보았는데
+0을 중심으로 어느정도 분포하지 예측값이 커지면서 잔차의 분산이 커집니다.
+하지만 0을 기준으로 +0.20 -0.10 사이에 모든 잔차들이 존재하므로 
+정규성과 등분산성을 만족한다고 할 수 있습니다.
+
+
+
+
+# 10-b
+```{r, warning=F} 
+
+#confidence interval
+library(boot)
+boot.coef <- function(data, indices){
+  data <- data[indices,]
+  mod <- lm(Mobility ~ Middle_class, data = data)
+            coefficients(mod)[-1]
+}
+
+boot.out <- boot(dat, boot.coef, 500)
+boot.out
+plot(boot.out)
+
+boot.ci(boot.out, index = 1, type =c("norm"))
+
+#prediction interval
+boot.pred <- function(data, indices){
+  data <- data[indices,]
+  mod <- lm(Mobility ~ Middle_class, data = data)
+  predict(mod,data)
+}
+
+boot.out2 <- boot(dat, boot.pred, 500)
+boot.out2
+plot(boot.out2)
+
+boot.ci(boot.out2, index = 1, type =c("norm"))
+
+```
+# 10-c
+```{r, warning=F}
+library(dplyr)
+dat_4 <- dat[complete.cases(dat[ , c("Middle_class")]), ]
+sum(is.na(dat_4$Middle_class))
+
+x = dat_4$Middle_class 
+y = dat_4$Mobility
+
+splinemod1 = smooth.spline(x,y,cv = FALSE)
+splinemod1$df
+
+
+plot(x, y, main = paste("df = ",splinemod1$df))
+lines(splinemod1$x,splinemod1$y, col = 'red', lwd= 2)
+
+resampler <- function(data) {
+  n <- nrow(data)
+  resample.rows <- sample(1:n,size=n,replace=TRUE)
+  return(data[resample.rows,])
+}
+
+spline.estimator <- function(data,m=300) {
+  fit <- smooth.spline(x=data[,1],y=data[,2],cv=TRUE)
+  eval.grid <- seq(from=min(data[,1]),to=max(data[,1]),length.out=m)
+  return(predict(fit,x=eval.grid)$y) 
+}
+
+spline.cis <- function(data,B,alpha=0.05,m=300) {
+  spline.main <- spline.estimator(data,m=m)
+  spline.boots <- replicate(B,spline.estimator(resampler(data),m=m))
+  cis.lower <- 2*spline.main - apply(spline.boots,1,quantile,probs=1-alpha/2)
+  cis.upper <- 2*spline.main - apply(spline.boots,1,quantile,probs=alpha/2)
+  return(list(main.curve=spline.main,lower.ci=cis.lower,upper.ci=cis.upper,
+              x=seq(from=min(data[,1]),to=max(data[,1]),length.out=m)))
+}
+
+
+dat_4 = dat_4 %>% select(Middle_class,Mobility)
+
+
+sp.cis <- spline.cis(dat_4, B=1000,alpha=0.05)
+plot(dat_4[,1],dat_4[,2])
+lines(x=sp.cis$x,y=sp.cis$main.curve, col = 'red', lwd = 2)
+lines(x=sp.cis$x,y=sp.cis$lower.ci, lty=2, col = 'blue', lwd = 2)
+lines(x=sp.cis$x,y=sp.cis$upper.ci, lty=2, col = 'blue', lwd = 2)
+
+```
+
+# 10-d
+그래프를 보면 비선형적인 추세를 보이므로 선형회귀분석 보다는 
+smoothing spline을 이용한 비모수적 회귀분석이 적합합니다.
+
+      
+
+   
+
+
+
+
+
