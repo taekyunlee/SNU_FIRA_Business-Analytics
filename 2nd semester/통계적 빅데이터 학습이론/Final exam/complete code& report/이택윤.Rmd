@@ -1,0 +1,451 @@
+---
+title: "Rmarkdown take home exam"
+author: "TAEK YUN LEE"
+date: "2018/9/09"
+output: word_document
+---
+#1-1
+Minimize : $\sum_{i=1}^{n}(y_{i}-\hat{\beta_{0}}-\sum_{j=1}^{p}\hat{\beta_{j}}x_{j}^2+\lambda\sum_{i=1}^p\hat{\beta_{j}^2}$
+In this case, $\hat{\beta_{0}} = 0$ and $n = p = 2$.
+So, the optimization looks like
+Minimize : $(y_{1}-\hat\beta_{1}x_{11}-\hat\beta_{2}x_{12})^2 + (y_{2}-\hat\beta_1x_{22})^2+\lambda(\hat\beta_{1}^2+\hat\beta_{2}^2)$
+
+
+#1-2 
+Answer :
+Argue that in this setting, the ridge coefficient estimates satisfy $\hat\beta_{1} = \hat\beta_{2}$.
+Given the situations that $x_{11} = x_{12} = x_{1}, x_{21} = x_{22} = x_{2}$, take the derivatives of the expression in (a) with respect to both $\hat\beta_{1}$ and $\hat\beta_{2}$ and setting them equal zero, then we get
+
+${\hat\beta_{1}^*} = \frac{x_{1}y_{1}+x_{2}y_{2} - \hat\beta_{2}^*(x_{1}^2+x_{2}^2)}{\lambda + x_{1}^2 + x_{2}^2}$
+
+
+${\hat\beta_{2}^*} = \frac{x_{1}y_{1}+x_{2}y_{2} - \hat\beta_{1}^*(x_{1}^2+x_{2}^2)}{\lambda + x_{1}^2 + x_{2}^2}$
+
+The symmetry form in the above formula suggests that $\hat\beta_1 = \hat\beta_2$
+
+
+#1-3
+Answer:
+The optimization looks like
+Minimize : $(y_{1} - \hat\beta_{1}x_{11}-\hat\beta_{2}x_{12})^2 + (y_{2}-\hat\beta_{1}x_{21}-\hat\beta_{2}x_{22})^2+\lambda(|\hat\beta_{1}|+{\hat\beta_{2}})$
+
+
+#1-4
+Argue that in this setting, the lasso coefficients $\ \hat\beta_1$ and $\ \hat\beta_2$ are not unique-in other wores, there are man possible solutions to the optimization problem in 3. Describe these solutions.
+
+
+$\ Answer : $ The Lasso contraint takes the form $\ |\hat\beta_1| + |\hat\beta_2| < s$ which plotted takes the shape of a diamond centered at origin (0,0). Next consider the sdquared optimization constrain $\ (y_1 - \hat\beta_1x_{11} - \hat\beta_2x_{12})^2 + (y_2 - \hat\beta_1x_{21} - \hat\beta_2x_{22})^2$. We use the facts $\ x_{11} = x_{12}$, $\ x_{21} = x_{22}$, $\ x_{11} + x_{21} = 0$, $\ x_{12} + x_{22} = 0$, and $\ y_{1} + y_{2} = 0$ to simlify is to minimize: $\ 2(y_1 - (\hat\beta_1 + \hat\beta_2)x_{11})^2$. 
+
+This optimization problem has a simple solution: $\ \hat\beta_1 + \hat\beta_2 = \frac{y_1}{x_{11}}$. this is a line parallel to the edge of Lasso-diamond $\ \hat\beta_1 + \hat\beta_2 = s$. Now the soluitions to the original Lasso optimization problem are contours of the function $\ (y_1 - (\hat\beta_1 + \hat\beta_2)x_{11})^2$ that touch the Lasso-diamond $\ \hat\beta_1 + \hat\beta_2 = s$. Finally, as $\ \hat\beta_1$ and $\ \hat\beta_2$ vary along the line $\ \hat\beta_1 + \hat\beta_2 = \frac{y_1}{x_{11}}$, these coniours touch the Lasso-diamond edge $\ \hat\beta_1 + \hat\beta_2 = s$ at different points. As a result, the enrire edge $\ \hat\beta_1 + \hat\beta_2 = s$ isd a potential solution to the Lasso optimization problem!
+
+Similar argument can be made for the opposite Lasso-diamond edge: $\ \hat\beta_1 + \hat\beta_2 = -s$.
+
+Thus, the Lasso problem does not have a unique solution. The general form of solution is
+
+$\ \hat\beta_1 +\hat\beta_2 = s;\hat\beta_1 \ge 0;\hat\beta_2 \ge 0;$ and $\ \hat\beta_1+\hat\beta_2 =  -s;\hat\beta_1\le0;\hat\beta_2\le0$.
+
+#2-1
+
+The least square line is given by [\hat{y} = 50 + 20GPA + 0.07IQ + 35Gender + 0.01GPA\times IQ - 10GPA\times Gender] which becomes for the males [\hat{y} = 50 + 20GPA + 0.07IQ + 0.01GPA\times IQ,] and for the females [\hat{y} = 85 + 10GPA + 0.07IQ + 0.01GPA\times IQ.] So the starting salary for males is higher than for females on average iff $50 + 20GPA\ge 85 + 10GPA$ which is equivalent to $GPA\ge 3.5$. Therefore iii. is the right answer.
+
+
+#2-2
+
+It suffices to plug in the given values in the least square line for females given above and we obtain [\hat{y} = 85 + 40 + 7.7 + 4.4 = 137.1,] which gives us a starting salary of $137100$$.
+
+#2-3
+
+False. To verify if the GPA/IQ has an impact on the quality of the model we need to test the hypothesis $H_0 : \hat{\beta_4} = 0$ and look at the p-value associated with the $t$ or the $F$ statistic to draw a conclusion.
+
+
+#3번
+```{r , message = FALSE , warning = FALSE}
+library(randomForest)
+dat3 = read.csv('C:/Users/renz/Desktop/data3.csv')
+dat3$k3 <- ifelse(dat3$k3 == 2 , 0 , dat3$k3) 
+
+
+cols<-c('k2','k3','k4','k6','k7','k8','k10','k12','k13','k14')
+dat3[,cols]<-lapply(dat3[,cols], factor) 
+
+dat3$k14 <- as.factor(dat3$k14)
+dat3$age <- as.factor(dat3$age)
+dat3$area <- as.factor(dat3$area)
+dat3$edu <- as.factor(dat3$edu)
+dat3$sex <- as.factor(dat3$sex)
+dat3$income <- as.factor(dat3$income)
+dat3$ideo_self <- as.factor(dat3$ideo_self)
+
+### k14 예측
+k = dat3[,c('sex','age1','age','area','edu','income','k14') ]
+
+
+train <- na.omit(k)
+rf.fit <- randomForest(k14 ~ sex  + age+ age1 + area + edu + income , data = train, n_tree =100)
+test <- dat3[is.na(dat3$k14)  ,  ][,c('sex','age1','age','area','edu','income','k14')]
+
+j=1 
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k14'] ))  {
+       
+     pred = predict(rf.fit, newdata = test[ j, ] , type ='response')
+     dat3[ i , 'k14'] =  pred   
+      j=j+1
+     } 
+} 
+### k13 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13') ]
+
+
+train <- na.omit(k)
+rf.fit <- randomForest(k13 ~ sex + age+ age1 + area + edu + income + k14 , data = train, n_tree =100)
+test <- dat3[is.na(dat3$k13)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k13'] ))  {
+        pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+         dat3[ i , 'k13'] =  pred  
+         j=j+1} 
+} 
+### k6 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k6 ~ sex + age+ age1 + area + edu + income + k14 +k13, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k6)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k6'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k6'] =  pred  
+    j=j+1} 
+} 
+
+### k7 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k7 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k7)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k7'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k7'] =  pred  
+    j=j+1} 
+} 
+
+### k8 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k8 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k8)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k8'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k8'] =  pred  
+    j=j+1} 
+} 
+
+### k2 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k2 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7 +k8, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k2)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k2'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k2'] =  pred  
+    j=j+1} 
+} 
+
+### k10 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k10 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7 +k8 +k2, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k10)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k10'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k10'] =  pred  
+    j=j+1} 
+} 
+
+### k12 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k12 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7 +k8 +k2 +k10, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k12)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k12'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k12'] =  pred  
+    j=j+1} 
+} 
+
+### k4 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12','k4') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k4 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7 +k8 +k2 +k10 +k12, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k4)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12','k4')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k4'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k4'] =  pred  
+    j=j+1} 
+} 
+
+### k3 예측
+
+k = dat3[,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12','k4','k3') ]
+
+train <- na.omit(k)
+rf.fit <- randomForest(k3 ~ sex + age+ age1 + area + edu + income + k14 +k13 +k6 +k7 +k8 +k2 +k10 +k12 +k4, data = train, n_tree =100)
+test <- dat3[is.na(dat3$k3)  ,  ][,c('sex','age1','age','area','edu','income','k14','k13','k6','k7','k8','k2','k10','k12','k4','k3')]
+
+
+j=1
+for(i in 1:nrow(dat3)){
+  if (is.na(dat3[ i , 'k3'] ))  {
+    pred = predict(rf.fit, newdata = test[ j , ] , type ='response')
+    dat3[ i , 'k3'] =  pred  
+    j=j+1} 
+} 
+
+### 
+
+#install.packages('caret')
+library(caret)
+
+
+result = list()
+result_acc = 0
+Fold_index <- createFolds(1:nrow(dat3), k = 10)
+
+Out_of_Sample <- c()
+for(k in 1:10){
+  Train <- dat3[-Fold_index[[k]],]
+  Test <- dat3[Fold_index[[k]],]
+  
+  out <- randomForest(ideo_self ~ ., data = Train)
+  test_pred <- predict(out, Test)
+  Out_of_Sample[[k]] <- test_pred
+  
+  result[[k]] = table(Test$ideo_self, test_pred)
+  result_acc[k] = sum(diag(result[[k]]))/sum(result[[k]])
+  print(confusionMatrix(Test$ideo_self , test_pred))
+}
+
+result_acc
+mean(result_acc)
+```
+ideo_self를 예측하기전에 우선 k2 ~ k14 사이의 NA 값들을 랜덤포레스트를 이용하여 값을 채워 넣습니다.
+K14 -> K13 -> K6 -> K7 -> K8 -> K2 -> K10 -> K12 -> K4 -> K3 
+이와 같은 순서대로 na값을 채워넣었고  
+처음 k14를 채워넣을때 'sex','age1','age','area','edu','income'들을 이용하여 학습시켰고 그후에 k14가 모두 채워지면 k14또한 변수로서 추가하는 방식으로 수행하였습니다.
+k2 ~ k14사이의 NA값을 모두채워 넣은뒤에는 모든 변수를 이용하여 랜덤포레스트로 ideo_self를 예측하였습니다.            
+  
+#4번
+
+```{r, message = FALSE , warning = FALSE}
+## 군집
+library(cluster)
+dat4 = read.csv('C:/Users/renz/Desktop/datt4.csv') 
+
+dat4$V1<- as.factor(dat4$V1)
+
+test.y = dat4$V1
+
+dist = dat4[,c(2,3)]
+dist <- daisy(dat4[,c(2,3)], metric = "gower")
+fit = hclust(dist, method = 'single')
+
+sum(cutree(fit, 2) - 1 == test.y)
+
+plot(fit)
+rect.hclust(fit, k=2, border="red")
+
+## 예측
+
+library(randomForest)
+library(caret)
+
+dat4$V1 <- as.factor(dat4$V1 )
+
+result = list()
+result_acc = 0
+Fold_index <- createFolds(1:nrow(dat4), k = 10)
+
+Out_of_Sample <- c()
+for(k in 1:10){
+  Train <- dat4[-Fold_index[[k]],]
+  Test <- dat4[Fold_index[[k]],]
+  
+  out <- randomForest(V1 ~ V2 + V3, data = Train)
+  test_pred <- predict(out, Test)
+  Out_of_Sample[[k]] <- test_pred
+  
+  result[[k]] = table(Test$V1, test_pred)
+  result_acc[k] = sum(diag(result[[k]]))/sum(result[[k]])
+  print(confusionMatrix(Test$V1 , test_pred))
+}
+
+result_acc
+mean(result_acc)
+```
+변수 v2과 v3를 이용하여 계층적 군집 분석을 시행하였으며 
+단일 연결법을 이용하여 계산하였습니다.
+또한 v1에 대한 예측시 사용된 변수는 역시 v2와 v3를 이용하였고 
+랜덤포레스트를 적용한 결과 분류정확도는 100%를 보였습니다. 
+
+#5번
+
+```{r, message = FALSE , warning = FALSE}
+dat5 = read.csv('C:/Users/renz/Desktop/dat5.csv')      
+party = read.csv('C:/Users/renz/Desktop/party.csv') 
+party = party[,-3]
+
+party <- party$party           
+party2 <- factor(party, labels=c("국민의당","더불어민주당","무소속", "바른정당","자유한국당","정의당"))
+
+dat5 <- dat5[,-1]
+
+rownames(dat5) = colnames(dat5) 
+
+dat5 <- max(dat5) - dat5
+```
+국회의원들끼리 공동발의한 법안의수가 클수록 거리가 가깝다고 할 수 있으므로 
+거리상의 가까움으로 정보를 다시 표시하기 위해서 공동발의 법안수가 가장큰값으로 
+각각의 법안 발의수를 빼 주었다.  max(dat5) - dat5
+
+```{r, message = FALSE , warning = FALSE}
+dat5_z <- as.data.frame(lapply(dat5, scale)) 
+rownames(dat5_z) = colnames(dat5_z)
+
+d <- dist(dat5_z)  
+
+par(mfrow = c(1,1))
+
+wssplot <- function(data, nc=20, seed=1){       
+  wss <- (nrow(data)-1)*sum(apply(data,2,var))               
+  for (i in 2:nc){
+    set.seed(seed)
+    wss[i] <- sum(kmeans(data, centers=i)$withinss)}
+  plot(1:nc, wss, type="b", xlab="Number of Clusters",
+       ylab="Within groups sum of squares")}
+
+wssplot(dat5_z)   
+```
+군집수에 따른 집단 내 제곱합을 계산해본 결과 군집수를 5개를 기준으로 늘리거나 줄이는것이 좋아보인다. 
+
+```{r, message = FALSE , warning = FALSE}
+# 계층적 군집분석 (평균연결법)
+set.seed(2)
+
+d=dist(dat5_z)
+fit.average=hclust(d, method="average")
+plot(fit.average,hang=-1,cex=.8,main="Average Linkage Clustering")
+
+rect.hclust(fit.average,k=5)
+
+cutree(fit.average, k=5)
+table(cutree(fit.average, k=5))
+
+table(party2)
+```
+계층적 군집분석 적용시 평균 연결법을 이용해보았습니다. 
+
+
+```{r, message = FALSE , warning = FALSE}
+d=dist(dat5_z)
+fit.ward=hclust(d, method="ward.D2")
+plot(fit.ward,hang=-1,cex=.8,main="ward Linkage Clustering")
+
+rect.hclust(fit.average,k=5)
+cutree(fit.ward, k=5)
+
+table(cutree(fit.ward, k=5))  
+table(party2)  
+
+clus <- cutree(fit.ward, k=5)
+ctable <- data.frame(colnames(dat5_z), clus)
+```
+계층적 군집분석 적용시 와드 연결법을 이용해 보았습니다.
+
+
+```{r, message = FALSE , warning = FALSE}
+# 계층적 군집분석 (최장연결법)
+d=dist(dat5_z)
+fit.complete=hclust(d, method="complete")
+plot(fit.complete,hang=-1,cex=.8,main="complete Linkage Clustering")
+
+rect.hclust(fit.complete,k=5)
+cutree(fit.complete, k=5)
+table(cutree(fit.complete, k=5))
+         
+```
+계층적 군집분석 적용시 최장 연결법을 이용해 보았습니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
