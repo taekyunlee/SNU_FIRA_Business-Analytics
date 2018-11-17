@@ -1,0 +1,115 @@
+---
+title: "homework1"
+author: "BA 이택윤"
+date: "2018년 9월 19일"
+output: word_document
+---
+
+```{r}
+set.seed(25)
+
+n = 5000  
+trueB = c(3,-3, 1.5, 0.7, 3)
+err = rnorm(n,sd=3)  
+
+u1 = runif(n)
+u2 = runif(n)
+u3 = runif(n)
+u4 = runif(n)
+
+logPr = u1 +  u2
+quality = u3 + u2
+dummy1 = (u4> 0.7)*1.0
+dummy2 = ((u4<0.7)&(u4>0.3))*1.0
+
+logQ= trueB[1] + trueB[2]*logPr + trueB[3]*dummy1 + trueB[4]*dummy2 + trueB[5]*quality + err
+```
+
+```{r}
+plot(x=logPr, y=logQ, col="blue", main="Correlation: \n log(Sales) vs. log(Price)",
+     xlab="log(Price)", ylab = "log(Sales)", pch=16)
+abline(h=mean(logQ),col="dark blue",lty="dotted")
+abline(v=mean(logPr),col="dark blue",lty="dotted")
+
+plot(x=dummy1, y=logQ, col="blue", main="Correlation: \n log(Sales) vs. Yellow Dummy",
+     xlab="Yellow Dummy", ylab = "log(Sales)", pch=16)
+abline(h=mean(logQ),col="dark blue",lty="dotted")
+abline(v=mean(dummy1),col="dark blue",lty="dotted")
+
+plot(x=dummy2, y=logQ, col="blue", main="Correlation: \n log(Sales) vs. Green Dummy",
+     xlab="Green  Dummy", ylab = "log(Sales)", pch=16)
+abline(h=mean(logQ),col="dark blue",lty="dotted")
+abline(v=mean(dummy2),col="dark blue",lty="dotted")
+
+plot(x=quality, y=logQ, col="blue", main="Correlation: \n log(Sales) vs. Quality Index",
+     xlab="Quality Index", ylab = "log(Sales)", pch=16)
+abline(h=mean(logQ),col="dark blue",lty="dotted")
+abline(v=mean(quality),col="dark blue",lty="dotted")
+```
+
+```{r}
+regout_full = lm(logQ ~ logPr+dummy1+dummy2+quality)
+print(summary(regout_full))
+
+regout_short = lm(logQ ~ logPr+dummy1+dummy2)
+print(summary(regout_short))
+```
+
+quality를 포함한 모형의 회귀결과와 quality를 포함하지 않은 
+모형의 회귀 결과를 보면 dummy1과 dummy2에 대한 회귀계수는 변화가 
+거의없다. 그리고 quality가 포함된 모형의 결정계수값은 0.167이며
+quality가 포함되지 않은 모형의 결정계수의 값은 0.05718로 설명력이 
+떨어졌다. 또한 가격계수를 보면 quality포함시 -2.9332이고 
+quality 제외시 -1.3843으로 나왔다.
+quality가 포함된 모형에서 가격계수를 제외한 모든변수가 고정되어있을때
+logpr 한단위 증가시 logQ는 -2.9332만큼 감소하지만
+quality가 포함되지 않은  모형에서 가격계수를 제외한 모든변수가 고정되어있을때
+logpr 한단위 증가시 logQ는 -1.3843만큼 감소한다.
+
+OVB(Omitted Variable Bias) 관점에서 이야기 하자면 우선
+quality를 포함한 모형은 실제 회귀계수인 3,-3, 1.5, 0.7, 3에 거의 비슷하게 
+적합하였다 따라서 제대로 적합한 모델이라고 볼 수 있는데 quality를 제외한 모델을 보면 logPr의 회귀계수가 -1.3843이다. 이것은 misspecified model을 
+사용했기 때문인데 우리는 misspecified model에서 가격계수의 기대값이 $$E[\hat\delta] = \beta_1 + (X_1'X)^{-1}X_1'X_2\beta_2$$ 임을 알고있다.
+즉, logpr 과 quality가 서로 상관관계가 있기 때문에 가격계수의 값은 원래의값인 beta1 (여기서는 -3) 으로 나오지 않고  $$X_1'X_2$$ 부분에 의하여
+편향되어진 값이 나오게된다. 또한 $$X_1'X_2\beta_2$$ 부분으로 인해서
+양의 부호로인해 upward-bias가 되며 가격 한 단위 증가에 대한 판매량 감소가
+줄어들어서 가격탄력성을 적게 추정했다고 할 수 있다.
+
+
+```{r}
+n = 5000  
+trueB = c(3,-3, 1.5, 0.7, 3)
+err = rnorm(n,sd=3) 
+
+u1 = runif(n)
+u2 = runif(n)
+u3 = runif(n)
+u4 = runif(n)
+
+
+logPr = u1 + u2
+quality = u3 
+dummy1 = (u4> 0.7)*1.0
+dummy2 = ((u4<0.7)&(u4>0.3))*1.0
+
+logQ = trueB[1] + trueB[2]*logPr + trueB[3]*dummy1 + trueB[4]*dummy2 + trueB[5]*quality + err
+
+regout_full = lm(logQ ~ logPr+dummy1+dummy2+quality)
+print(summary(regout_full))
+
+regout_short = lm(logQ ~ logPr+dummy1+dummy2)
+print(summary(regout_short))
+```
+
+품질과 가격간의 상관관계가 없는  모형에서 quality가 포함된 모형과 포함되지않은 모형 
+둘다 p-value가 작으므로 모형의 유의성이 있다고 할 수 있고
+결정계수의 값은 각각 0.24와 0.1763으로 나왔다. 
+각각의 회귀계수들은 quailty가 포함된 모형과 그렇지 않은 모형 둘다 비슷하고 
+참값에 가까운데 이 이유를 가격계수 측면에서 이야기 해보자면
+$$E[\hat\delta] = \beta_1 + (X_1'X)^{-1}X_1'X_2\beta_2$$임을 알고 있는데 
+logpr과 quality가 상관관계가 없으므로 $$X_1'X_2$$ 부분이 거의 0이되어 버린다. 
+따라서 원래의 beta1값 즉, 원래의 가격계수인 -3에 거의 편향이 없이 추정하게 되는것이다.
+
+
+
+
